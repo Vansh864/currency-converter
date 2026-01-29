@@ -1,49 +1,30 @@
-const base_URL = "https://v6.exchangerate-api.com/v6/5bdbb27aacec5d6101348d38/latest/INR"; //INR is base currency
-
-const dropdown = document.querySelectorAll("select");
-const imgFrom = document.querySelector(".img-from");
-const imgTo = document.querySelector(".img-to");
-const button = document.querySelector("button");
+const selects = document.querySelectorAll("select");
 const input = document.querySelector("input");
-const result = document.querySelector(".result");
+const button = document.querySelector("button");
+const URL = "https://v6.exchangerate-api.com/v6/5bdbb27aacec5d6101348d38/latest/USD"; //from USD
 
-
-const updateFlag = (countryName, select) => {
-    if(select == "from") {
-        imgFrom.src = `https://flagsapi.com/${countryName}/flat/64.png`;
-    }
-    if(select == "to") {
-        imgTo.src = `https://flagsapi.com/${countryName}/flat/64.png`;
-    }
+const updateFlag = (name, country) => {
+    document.querySelector(`.${name}-flag`).setAttribute("src", `https://flagsapi.com/${country}/flat/64.png`);
 };
 
-const currencyChange = async () => {
-    let fromCurrencyCode = dropdown[0].value;
-    let toCurrencyCode = dropdown[1].value;
-    let URL = `https://v6.exchangerate-api.com/v6/5bdbb27aacec5d6101348d38/latest/${fromCurrencyCode}`;
-    let conversion_rates = (await (await fetch(URL)).json()).conversion_rates;
-    let baseValue = conversion_rates[toCurrencyCode];
-    result.innerText = `${input.value} ${fromCurrencyCode} = ${(input.value)*baseValue} ${toCurrencyCode}`;
-};
-
-for(let select of dropdown) {
-    for(let currencyCode in countryList) {
-        let newOption = document.createElement("option");
-        newOption.setAttribute("value", currencyCode);
-        newOption.innerText = currencyCode;
-        select.append(newOption);
-    }
+for(let country in countryList) { //to add all options
+    let option = document.createElement("option");
+    option.innerText = country;
+    option.setAttribute("value", country);
+    selects[0].append(option);
+    selects[1].append(option.cloneNode(true));
 }
-dropdown[0].value = "USD";
-dropdown[1].value = "INR";
-currencyChange();
 
-for(let select of dropdown) {
+selects[0].value = "USD";
+selects[1].value = "INR";
+
+for(let select of selects) {
     select.addEventListener("change", () => {
-        updateFlag(countryList[select.value], select.name);
+        updateFlag(select.name, countryList[select.value]);
     });
 }
 
-button.addEventListener("click", () => {
-    currencyChange();
+button.addEventListener("click", async () => {
+    document.querySelector(".res").innerText  = `${input.value} ${selects[0].value} = ${input.value * ((await (await fetch(`https://v6.exchangerate-api.com/v6/5bdbb27aacec5d6101348d38/latest/${selects[0].value}`)).json()).conversion_rates[selects[1].value])} ${selects[1].value}`;
+    console.log();
 });
